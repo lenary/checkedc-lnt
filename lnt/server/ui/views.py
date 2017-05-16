@@ -290,8 +290,9 @@ class V4RequestInfo(object):
         # Get the aggregation function to use.
         aggregation_fn_name = request.args.get('aggregation_fn')
         self.aggregation_fn = {'min': lnt.util.stats.safe_min,
-                               'median': lnt.util.stats.median}.get(
-            aggregation_fn_name, lnt.util.stats.safe_min)
+                               'median': lnt.util.stats.median,
+                               'mean': lnt.util.stats.mean}.get(
+            aggregation_fn_name, lnt.util.stats.mean)
 
         # Get the MW confidence level.
         try:
@@ -423,15 +424,15 @@ def v4_run(id):
     # Parse the view options.
     options = {}
     options['show_delta'] = bool(request.args.get('show_delta'))
-    options['show_previous'] = bool(request.args.get('show_previous'))
-    options['show_stddev'] =  bool(request.args.get('show_stddev'))
+    options['show_previous'] = bool(request.args.get('show_previous', default=True))
+    options['show_stddev'] =  bool(request.args.get('show_stddev', default=True))
     options['show_mad'] = bool(request.args.get('show_mad'))
-    options['show_all'] = bool(request.args.get('show_all'))
+    options['show_all'] = bool(request.args.get('show_all', default=True))
     options['show_all_samples'] = bool(request.args.get('show_all_samples'))
     options['show_sample_counts'] = bool(request.args.get('show_sample_counts'))
     options['show_graphs'] = show_graphs = bool(request.args.get('show_graphs'))
     options['show_data_table'] = bool(request.args.get('show_data_table'))
-    options['show_small_diff'] = bool(request.args.get('show_small_diff'))
+    options['show_small_diff'] = bool(request.args.get('show_small_diff', default=True))
     options['hide_report_by_default'] = bool(
         request.args.get('hide_report_by_default'))
     options['num_comparison_runs'] = info.num_comparison_runs
@@ -450,7 +451,7 @@ def v4_run(id):
     else:
         test_min_value_filter = 0.0
 
-    options['aggregation_fn'] = request.args.get('aggregation_fn', 'min')
+    options['aggregation_fn'] = request.args.get('aggregation_fn', 'mean')
 
     # Get the test names.
     test_info = ts.query(ts.Test.name, ts.Test.id).\
